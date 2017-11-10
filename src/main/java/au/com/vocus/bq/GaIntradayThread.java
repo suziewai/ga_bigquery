@@ -1,5 +1,6 @@
 package au.com.vocus.bq;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -24,6 +25,7 @@ public class GaIntradayThread extends AbstractGaThread {
 	private int maxPageSize = 50000;
 		
 	private String intraDay;
+	private long lastUpdate = 0;
 	
 	public GaIntradayThread(Dataset dataset) {
 		this.dataset = dataset;
@@ -42,21 +44,69 @@ public class GaIntradayThread extends AbstractGaThread {
 	public void run() {
 		
 		this.dsId = dataset.getDatasetId().getDataset();
-		this.sql = buildQueryString(csvWriter.getColumns());
-		
-		System.out.println(Calendar.getInstance().getTime() + " - GaIntradayThread " + dsId + " started...");
-			
 		intraDay = prop.getFormatter().format(new Date());
-		Job job = submitJob(TABLE_PREFIX + intraDay);
-   		   		
-   		try {
+		lastUpdate = Long.parseLong(prop.getLastUpdate(dsId));
+
+		System.out.println(Calendar.getInstance().getTime() + " - GaIntradayThread " + dsId + " started...");
+		try {
+			
+			if(!hasNewData(dsId + "." + TABLE_PREFIX + intraDay))
+				return;
+				
+			this.sql = buildQueryString(csvWriter.getColumns());
+			Job job = submitJob(TABLE_PREFIX + intraDay);
 			getData(job);
+			
+			prop.setLastUpdate(dsId, String.valueOf(lastUpdate));
+			
 		} catch (Exception e) {
-			System.out.println("Error occurred in querying job " + job.getJobId().getJob());
+			System.out.println("Error occurred in querying intraday data ");
 			e.printStackTrace();
 		}
    		   		
    		System.out.println(Calendar.getInstance().getTime() + " - GaIntradayThread " + dsId + " completed...");
+	}
+
+	private boolean hasNewData(String tableId) throws InterruptedException, TimeoutException {
+		
+		long visitStartTime = 0;
+		
+		QueryJobConfiguration queryConfig = QueryJobConfiguration
+				.newBuilder("SELECT visitStartTime FROM [" + tableId + "] ORDER by visitStartTime desc LIMIT 1")
+				.build();
+
+		JobId jobId = JobId.of(UUID.randomUUID().toString());
+		Job queryJob = bigquery.create(JobInfo.newBuilder(queryConfig).setJobId(jobId).build());
+		queryJob = queryJob.waitFor();
+
+		if (queryJob == null) {
+			throw new RuntimeException("Job no longer exists");
+		} else if (queryJob.getStatus().getError() != null) {
+		    throw new RuntimeException(queryJob.getStatus().getError().toString());
+		}
+
+		QueryResponse response = bigquery.getQueryResults(queryJob.getJobId(), QueryResultsOption.pageSize(maxPageSize));
+		QueryResult result = response.getResult();
+		for (List<FieldValue> row : result.iterateAll()) {
+			visitStartTime = row.get(0).getLongValue();
+		}
+		
+		if(visitStartTime > lastUpdate) {
+			lastUpdate = visitStartTime;
+			return true;
+		}
+		return false;
+	}
+	
+	private Job submitJob(String tableId) {
+		
+		QueryJobConfiguration queryConfig = QueryJobConfiguration.newBuilder(getQueryString(tableId)).build();
+
+		/* Create a job ID so that we can safely retry. */
+		JobId jobId = JobId.of(UUID.randomUUID().toString());
+		Job queryJob = bigquery.create(JobInfo.newBuilder(queryConfig).setJobId(jobId).build());
+		
+		return queryJob;
 	}
 
 	private void getData(Job queryJob) throws InterruptedException, TimeoutException {
@@ -75,8 +125,9 @@ public class GaIntradayThread extends AbstractGaThread {
 		QueryResponse response = bigquery.getQueryResults(queryJob.getJobId(), QueryResultsOption.pageSize(maxPageSize));
 		QueryResult result = response.getResult();
 
+		String filename = dsId + "_intraday.csv";
 		csvWriter.createFolder("intraday");
-		csvWriter.createFile(dsId + "_intraday.csv", false, ",", true);
+		csvWriter.createFile(filename, false, ",", true);
 		
 		for (List<FieldValue> row : result.iterateAll()) {
 			boolean isFirstColumn = true;
@@ -89,18 +140,12 @@ public class GaIntradayThread extends AbstractGaThread {
 		}
 		
 		csvWriter.closeFile();
-
-	}
-	
-	private Job submitJob(String tableId) {
-			
-		QueryJobConfiguration queryConfig = QueryJobConfiguration.newBuilder(getQueryString(tableId)).build();
-
-		/* Create a job ID so that we can safely retry. */
-		JobId jobId = JobId.of(UUID.randomUUID().toString());
-		Job queryJob = bigquery.create(JobInfo.newBuilder(queryConfig).setJobId(jobId).build());
-		
-		return queryJob;
+		try {
+			csvWriter.moveCompletedFile(filename, "completed");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 }

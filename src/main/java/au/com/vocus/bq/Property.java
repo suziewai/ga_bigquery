@@ -39,8 +39,12 @@ public class Property {
 		return Boolean.valueOf(PROPS.getProperty(dsid+PropertyKey.DISABLED));
 	}
 	
-	public String getLastUpdate(String dsid) {		
-		return PROPS.getProperty(dsid+PropertyKey.LAST_UPDATE);
+	public String getLastUpdate(String dsid) {
+		String lastUpdate = PROPS.getProperty(dsid+PropertyKey.LAST_UPDATE);
+		if(lastUpdate == null || "".equals(lastUpdate))
+			return "0";
+		
+		return lastUpdate;
 	}
 		
 	public void setLastUpdate(String dsid, String lastUpdate) {

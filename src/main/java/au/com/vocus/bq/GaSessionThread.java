@@ -132,12 +132,14 @@ public class GaSessionThread extends AbstractGaThread {
 		}
 		
 		csvWriter.closeFile();
+		/*
 		try {
 			csvWriter.moveCompletedFile(filename, "completed");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		*/
 	}
 	
 	private Job submitJob(String tableId) {

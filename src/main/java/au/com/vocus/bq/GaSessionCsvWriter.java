@@ -16,7 +16,7 @@ import java.util.List;
 
 public class GaSessionCsvWriter {
 
-	private String PATH_PREFIX = "data";
+	private String PATH_PREFIX = "/data/app/bq";
 	private List<String> columns;
 	private PrintWriter pw = null;
 	private String delimiter = "";

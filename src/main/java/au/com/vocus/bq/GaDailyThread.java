@@ -93,7 +93,7 @@ public class GaDailyThread extends AbstractGaThread {
 		QueryResponse response = bigquery.getQueryResults(queryJob.getJobId(), QueryResultsOption.pageSize(maxPageSize));
 		QueryResult result = response.getResult();
 
-		String filename = dsId + "_" + tableId + ".csv";
+		String filename = dsId + "_" + tableId + "_daily.csv";
 		csvWriter.createFolder("daily");
 	    csvWriter.createFile(filename, false, ",", true);
 		
