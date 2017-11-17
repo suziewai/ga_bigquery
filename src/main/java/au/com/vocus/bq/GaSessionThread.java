@@ -28,7 +28,7 @@ public class GaSessionThread extends AbstractGaThread {
 	private String startExportDate = "";
 	private String stopExportDate = "";
 	private boolean newFile = false;
-	private int maxPageSize = 100;
+	private int maxPageSize = 5000;
 	
 	public GaSessionThread(Dataset dataset) {
 		this.dataset = dataset;

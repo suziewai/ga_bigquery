@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.file.CopyOption;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -388,7 +387,7 @@ public class GaSessionCsvWriter {
 	}
 	
 	private void writeValue(Object value) {
-		String v = value == null ? "" : value.toString();
+		String v = value == null ? "" : value.toString().replace("\"", "\"\"").replace("\"" + delimiter, "\"\\" + delimiter);
 		
 		if(withQuote)
 			pw.printf("\"%s\"", v);
