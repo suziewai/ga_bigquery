@@ -387,7 +387,12 @@ public class GaSessionCsvWriter {
 	}
 	
 	private void writeValue(Object value) {
-		String v = value == null ? "" : value.toString().replace("\"", "\"\"").replace("\"" + delimiter, "\"\\" + delimiter);
+		String v = value == null ? "" : value.toString()
+											.replace("\\", "\\\\")								//replace '\' with '\\' 
+											.replace("\"", "\\\"")								//replace '"' with '\"'
+											.replace("\"" + delimiter, "\"\\" + delimiter)		//escape delimiter with '\'
+											.replace("\r", "")									//remove carriage return
+											.replace("\n", "\\\n");								//escape newline
 		
 		if(withQuote)
 			pw.printf("\"%s\"", v);
