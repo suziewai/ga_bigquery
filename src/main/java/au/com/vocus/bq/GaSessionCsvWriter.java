@@ -388,14 +388,17 @@ public class GaSessionCsvWriter {
 	
 	private void writeValue(Object value) {
 		String v = value == null ? "" : value.toString()
-											.replace("\\", "\\\\")								//replace '\' with '\\' 
-											.replace("\"", "\\\"")								//replace '"' with '\"'
-											.replace("\"" + delimiter, "\"\\" + delimiter)		//escape delimiter with '\'
-											.replace("\r", "")									//remove carriage return
-											.replace("\n", "\\\n");								//escape newline
+											.replace("\\", "\\\\")						//replace '\' with '\\' 
+											.replace("\"", "\\\"")						//replace '"' with '\"'
+											.replace(delimiter, "\\" + delimiter)		//escape delimiter with '\'
+											.replace("\r", "")							//remove carriage return
+											.replace("\n", "\\\n");						//escape newline
 		
+		//Add a space at the end to avoid backslash clashing with quote
+		//if(v.endsWith("\\"))
+		//	v = v + " ";
 		if(withQuote)
-			pw.printf("\"%s\"", v);
+			pw.printf("\"%s\"", v);	
 		else
 			pw.printf("%s%s", v);
 	}
