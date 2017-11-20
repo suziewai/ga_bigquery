@@ -1,6 +1,5 @@
 package au.com.vocus.bq;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;

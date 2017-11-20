@@ -1,5 +1,6 @@
 package au.com.vocus.bq;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +21,7 @@ public abstract class AbstractGaThread implements Runnable{
 	protected Dataset dataset;
 	
 	protected Property prop;
+	protected SimpleDateFormat df;
 	
 	@Override
 	public abstract void run();

@@ -2,6 +2,7 @@ package au.com.vocus.bq;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -30,7 +31,7 @@ public class GaDailyThread extends AbstractGaThread {
 	private String stopExportDate = "";
 	
 	private LinkedHashMap<String, Job> jobList = new LinkedHashMap<String, Job>();
-	
+		
 	public GaDailyThread(Dataset dataset) {
 		this.dataset = dataset;
 	}
@@ -46,13 +47,14 @@ public class GaDailyThread extends AbstractGaThread {
 	@Override
 	public void run() {
 		
+		this.df = new SimpleDateFormat(prop.getDateFormat());
 		this.dsId = dataset.getDatasetId().getDataset();
 		this.sql = buildQueryString(csvWriter.getColumns());
 		
 		System.out.println(Calendar.getInstance().getTime() + " - GaDailyThread " + dsId + " started...");
 		
 		startExportDate = prop.getLastUpdate(dsId);
-		stopExportDate = prop.getFormatter().format(new Date());
+		stopExportDate = df.format(new Date());
 		
 		String tableId = getTableId(startExportDate);
 		while(tableId.compareTo(stopExportDate) < 0) {
@@ -135,13 +137,13 @@ public class GaDailyThread extends AbstractGaThread {
 	private String getTableId(String lastUpdate) {
 		Calendar nextDate = Calendar.getInstance();
 		try {
-			nextDate.setTime(prop.getFormatter().parse(lastUpdate));
+			nextDate.setTime(df.parse(lastUpdate));
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		nextDate.add(Calendar.DATE, 1);
-		return prop.getFormatter().format(nextDate.getTime());
+		return df.format(nextDate.getTime());
 	}
 
 }

@@ -19,6 +19,7 @@ public class BqMain {
 	private static final String OPTION_PAGE_SIZE = "-ps";
 	private static final String OPTION_DS_LIST = "-dl";
 	private static final String OPTION_MODE = "-mode";
+	private static final String OPTION_PROP_FILE = "-pf";
 		
 	private static final String PROJECT_ID = "vocusgroup";
 	private static Hashtable<String, String> arguments;
@@ -34,7 +35,8 @@ public class BqMain {
 	public static void main(String[] args) {
 
 		parseArgList(args);
-		Property prop = new Property(arguments.get(OPTION_MODE));
+		Property prop = arguments.get(OPTION_PROP_FILE) == null ? new Property(arguments.get(OPTION_MODE)) : new Property(arguments.get(OPTION_PROP_FILE));
+
 		
 		// Instantiates a client
 		//BigQuery bigquery = BigQueryOptions.newBuilder().setProjectId(PROJECT_ID).build().getService();

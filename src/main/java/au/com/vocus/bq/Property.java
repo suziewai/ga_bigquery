@@ -5,20 +5,18 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.SimpleDateFormat;
 import java.util.Properties;
 
 public class Property {
 
 	public static class PropertyKey {
-		public static String DISABLED = ".diabled";
+		public static String DISABLED = ".disabled";
 		public static String DATE_FORMAT = "tableId.date.format";
 		public static String LAST_UPDATE = ".tableId.lastupdate";
 	}
 
 	private static String filename = ".bq.properties";
 	private Properties PROPS = new Properties();
-	private SimpleDateFormat df;
 	
 	public Property(String mode) {
 		try {
@@ -26,9 +24,7 @@ public class Property {
             final InputStream inputStream = new FileInputStream(filename);
             PROPS.load(inputStream);
             inputStream.close();
-            
-            df = new SimpleDateFormat(getDateFormat());
-            
+                        
         } catch (IOException e) {
             System.out.println("Error loading properties file.");
             e.printStackTrace();
@@ -54,11 +50,7 @@ public class Property {
 	public String getDateFormat() {
 		return PROPS.getProperty(PropertyKey.DATE_FORMAT);
 	}
-	
-	public SimpleDateFormat getFormatter() {
-		return df;
-	}
-		
+			
 	public void save() {
 		try {
 			PROPS.store(new FileOutputStream(filename), null);

@@ -1,6 +1,7 @@
 package au.com.vocus.bq;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -43,8 +44,9 @@ public class GaIntradayThread extends AbstractGaThread {
 	@Override
 	public void run() {
 		
+		this.df = new SimpleDateFormat(prop.getDateFormat());
 		this.dsId = dataset.getDatasetId().getDataset();
-		intraDay = prop.getFormatter().format(new Date());
+		intraDay = df.format(new Date());
 		lastUpdate = Long.parseLong(prop.getLastUpdate(dsId));
 
 		System.out.println(Calendar.getInstance().getTime() + " - GaIntradayThread " + dsId + " started...");
